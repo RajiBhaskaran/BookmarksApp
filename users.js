@@ -1,6 +1,11 @@
 var mongojs  = require('mongodb'),db;
 
-mongojs.connect('mongodb://localhost:27017/users', ["data"],function(err,result){
+var mongoUri = process.env.MONGOLAB_URI || 
+  process.env.MONGOHQ_URL || 
+  'mongodb://localhost:27017/users'; 
+
+
+mongojs.connect(mongoUri, ["data"],function(err,result){
 	if(!err)
      db = result.collection('data');
 });
