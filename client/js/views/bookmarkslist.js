@@ -71,9 +71,9 @@ window.BookmarksRowView = Backbone.View.extend({
 
         if( this.model.edit ) {
             var b_old_name = this.model.get('bookmark_name'),
+                b_old_url = this.model.get('bookmark_url'),
             new_folder_name = this.$('#changedFolder').val();
             this.model.set({'bookmark_name' : b_name , 'bookmark_url': b_url , 'folder_name':new_folder_name });
-            this.model.edit = false;
             // Since bookmark's idAttribute itself is its name, model.save uses only new name in url.
             // Hence to avoid it, we make ajax PUT directly
             $.ajax({
@@ -83,9 +83,12 @@ window.BookmarksRowView = Backbone.View.extend({
                 dataType : 'json',
                 data : JSON.stringify(this.model.toJSON()),
                 success : function(){
+                    self.model.edit = false;
+                    self.render();
                     app.fetchfolderbookmarks(self.folder_name);
                 },
                 error : function(err, msg) {
+                    self.model.set({'bookmark_name' : b_old_name , 'bookmark_url': b_old_url , 'folder_name':self.folder_name });
                     self.$('#bookmarkError').removeClass('hide').text(err.responseText);
                 }
             });

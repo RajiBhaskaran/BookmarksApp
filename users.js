@@ -107,36 +107,49 @@ exports.updateBookmark = function ( req, res ) {
 		res.status(500).send('Enter both name and url');
 	else {
 		
-			db.find( { "_id" : profileId , "folders.name" : old_f_name },{ "folders.$.bookmarks" : 1}).toArray( 
-				function(err, resp){
-					var bookmark = resp[0].folders[0].bookmarks.filter(function(bm){
-						return (bm.bookmark_name == old_b_name) ;
-					})
-					if(new_b_name)
-						bookmark[0].bookmark_name = new_b_name;
-					if(new_b_url)
-						bookmark[0].bookmark_url = new_b_url;
-					
-					db.update( 
-						{ "_id" : profileId ,"folders.name" : old_f_name }, 
-						{ 
-							$pull: { "folders.$.bookmarks" : { "bookmark_name" : old_b_name } }
-						},
-						function(err, result){
+		db.find( 
+			{ '_id' : profileId , "folders.bookmarks.bookmark_name" : new_b_name }, 
+			{ 
+				"folders.$.bookmarks" : 1
+			}).toArray(
+			function(err, result){
+				if(!result.length || (result.length && old_b_name == new_b_name)){
+
+					db.find( { "_id" : profileId , "folders.name" : old_f_name },{ "folders.$.bookmarks" : 1}).toArray( 
+						function(err, resp){
+							var bookmark = resp[0].folders[0].bookmarks.filter(function(bm){
+								return (bm.bookmark_name == old_b_name) ;
+							})
+							if(new_b_name)
+								bookmark[0].bookmark_name = new_b_name;
+							if(new_b_url)
+								bookmark[0].bookmark_url = new_b_url;
+							
 							db.update( 
-								{ '_id' : profileId , "folders.name" : new_f_name ? new_f_name : old_f_name }, 
+								{ "_id" : profileId ,"folders.name" : old_f_name }, 
 								{ 
-									$addToSet: { "folders.$.bookmarks" : bookmark[0] }
+									$pull: { "folders.$.bookmarks" : { "bookmark_name" : old_b_name } }
 								},
-								{ upsert: true },
-								function(err, result){
-									res.json(result);
+								function(err, resl){
+									db.update( 
+										{ '_id' : profileId , "folders.name" : new_f_name ? new_f_name : old_f_name }, 
+										{ 
+											$addToSet: { "folders.$.bookmarks" : bookmark[0] }
+										},
+										{ upsert: true },
+										function(err, result){
+											res.json(result);
+										}
+									);
 								}
 							);
 						}
 					);
 				}
-			);
+				else {
+					res.status(500).send('Bookmark name already exists');
+				}
+			});
 			
 		}
 	

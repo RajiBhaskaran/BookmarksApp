@@ -119,7 +119,8 @@ window.FoldersRowView = Backbone.View.extend({
                         self.render();
                         app.folderNames = _.without(app.folderNames , old_name );
                         app.folderNames.push(f_name);
-                        app.showfolderbookmarks(self.model.toJSON());
+                        app.fetchfolderbookmarks(f_name);
+                        
                     }
                 });
             }
