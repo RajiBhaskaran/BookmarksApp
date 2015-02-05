@@ -10,6 +10,8 @@ app.use(express.static(__dirname + '/client'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+
+
 // profile_id is the primary key, which is google profile ID
 // To get all the bookmarks in a folder
 app.get('/users/:profile_id/folder/:folder_name', users.getFolderBookmarks);
@@ -35,6 +37,10 @@ app.delete('/users/:profile_id/folder/:folder_name', users.removeFolder );
 
 // To create a folder for a user
 app.post('/users/:profile_id/folder', users.addFolder );
+
+app.get('/',function(req,res){
+	res.sendfile(__dirname + '/client/index.htm');
+})
 
 
 app.listen(8000);
